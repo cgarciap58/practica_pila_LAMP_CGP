@@ -46,6 +46,8 @@ El objetivo de esta práctica es aprender a crear una infraestructura con stack 
 
 4. Añadimos los scripts de aprovisionamiento con todos los pasos necesarios
 
+---
+
     #!/bin/bash
 
     echo "Comprobando conexión a internet"
@@ -87,4 +89,5 @@ El objetivo de esta práctica es aprender a crear una infraestructura con stack 
     echo "Procediendo a habilitar Apache"
     sudo systemctl enable apache2
 
+---
 
