@@ -22,21 +22,24 @@ El objetivo de esta práctica es aprender a crear una infraestructura con stack 
 3. Modificamos el VagrantFile para que podamos lanzar las máquinas pertinentes
 
 ---
-Vagrant.configure("2") do |config|
-    config.vm.box = "debian/bookworm64"
-    config.vm.box_version = "12.20250126.1"
-    
-    config.vm.define "cesarGarciaApache" do |cesarGarciaApache|
-      cesarGarciaApache.vm.hostname = "cesarGarciaApache"
-      cesarGarciaApache.vm.network "private_network", ip: "192.168.10.1", virtualbox__intnet: "redinterna"
-      cesarGarciaApache.vm.network "forwarded_port", guest: 80, host: 8080
-      cesarGarciaApache.vm.provision "shell", path: "aprov_cesarGarciaApache.sh"
+
+    Vagrant.configure("2") do |config|
+
+        config.vm.box = "debian/bookworm64"
+        config.vm.box_version = "12.20250126.1"
+        
+        config.vm.define "cesarGarciaApache" do |cesarGarciaApache|
+        cesarGarciaApache.vm.hostname = "cesarGarciaApache"
+        cesarGarciaApache.vm.network "private_network", ip: "192.168.10.1", virtualbox__intnet: "redinterna"
+        cesarGarciaApache.vm.network "forwarded_port", guest: 80, host: 8080
+        cesarGarciaApache.vm.provision "shell", path: "aprov_cesarGarciaApache.sh"
+        end
+
+        config.vm.define "cesarGarciaMySQL" do |cesarGarciaMySQL|
+        cesarGarciaMySQL.vm.hostname = "cesarGarciaMySQL"
+        cesarGarciaMySQL.vm.network "private_network", ip: "192.168.10.2", virtualbox__intnet: "redinterna"
+        cesarGarciaMySQL.vm.provision "shell", path: "aprov_cesarGarciaMySQL.sh"
+        end
     end
 
-    config.vm.define "cesarGarciaMySQL" do |cesarGarciaMySQL|
-      cesarGarciaMySQL.vm.hostname = "cesarGarciaMySQL"
-      cesarGarciaMySQL.vm.network "private_network", ip: "192.168.10.2", virtualbox__intnet: "redinterna"
-      cesarGarciaMySQL.vm.provision "shell", path: "aprov_cesarGarciaMySQL.sh"
-    end
-end
 ---
