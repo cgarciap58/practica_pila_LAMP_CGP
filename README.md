@@ -202,6 +202,9 @@ vagrant up
 
 7. Navegamos a localhost:8080 para comprobar que la web funciona correctamente
 
+![Prueba de la web](https://raw.githubusercontent.com/cgarciap58/practica_pila_LAMP_CGP/main/captura_stack_LAMP.png)
+
+
 ## Explicación de los scripts
 
 ### Script aprovisionamiento de la máquina Apache
