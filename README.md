@@ -240,3 +240,97 @@ sudo apt install -y mariadb-client && echo "mariadb-client instalado correctamen
 sleep 1
 ```
 
+4. Clonado o actualización del repositorio
+
+Se crea una variable que almacena la ruta del directorio de la aplicación.
+Si el directorio no existe, se clona el repositorio.
+Si el directorio existe, se actualiza el repositorio con git pull.
+
+```bash
+APP_DIR="/var/www/html/iaw-practica-lamp"
+
+if [ ! -d "$APP_DIR" ]; then
+    git clone https://github.com/josejuansanchez/iaw-practica-lamp "$APP_DIR"
+else
+    echo "Repositorio ya existe, actualizando..."
+    cd "$APP_DIR"
+    git pull
+fi
+```
+
+5. Configuración de permisos
+
+Se asegura que los permisos del archivo config.php sean correctos.
+Permisos totales sobre el directorio y permisos de lectura y ejecución para el usuario www-data.
+A los demás
+
+```bash
+chown -R www-data:www-data "$APP_DIR"
+find "$APP_DIR" -type d -exec chmod 755 {} \;
+find "$APP_DIR" -type f -exec chmod 644 {} \;
+```
+
+6. Configuración de Apache
+
+Se crea un archivo de configuración para el sitio web.
+'EOF' es un marcador que indica el principio y final del archivo. Se pasa como input al comando cat, que luego crea el archivo.
+
+```bash
+cat > /etc/apache2/sites-available/iaw-practica.conf <<EOF
+<VirtualHost *:80>
+    DocumentRoot $APP_DIR/src
+    <Directory $APP_DIR/src>
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+EOF
+```
+
+7. Se deshabilita el sitio por defecto y se habilita el nuevo
+
+```bash
+a2dissite 000-default.conf
+a2ensite iaw-practica.conf
+a2enmod rewrite
+systemctl restart apache2
+```
+
+8. Se modifica el config.php automáticamente
+
+Se crea un archivo de configuración para la base de datos.
+
+```bash
+cat > "$CONFIG_FILE" <<'EOF'
+<?php
+define('DB_HOST', '192.168.10.6');   // IP privada de la VM DB
+define('DB_NAME', 'iawdb');           // nombre de la base de datos
+define('DB_USER', 'iawuser');         // usuario de la DB
+define('DB_PASSWORD', 'iawpass');     // contraseña del usuario
+
+$mysqli = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+
+if (!$mysqli) {
+    die("Connection failed: " . mysqli_connect_error());
+}
+?>
+EOF
+```
+9. Se asegura que los permisos del archivo config.php sean correctos
+
+```bash
+chown www-data:www-data "$CONFIG_FILE"
+chmod 644 "$CONFIG_FILE"
+```
+
+10. Se rehabilita Apache
+
+```bash
+systemctl restart apache2
+```
+
+11. Se muestra el estado de Apache
+
+```bash
+systemctl status apache2
+```
