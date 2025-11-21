@@ -411,7 +411,9 @@ INSERT INTO users (nombre, email) VALUES
 ('Ana Torres', 'ana.torres@example.com'),
 ('Luis Gómez', 'luis.gomez@example.com'),
 ('Marta Ruiz', 'marta.ruiz@example.com');
-MYSQL_SCRIPT && echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
+MYSQL_SCRIPT
+
+echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
 ```
 
 5. Se borra la ruta por defecto para que la máquina no pueda acceder a Internet

@@ -40,6 +40,7 @@ INSERT INTO users (nombre, email) VALUES
 ('Ana Torres', 'ana.torres@example.com'),
 ('Luis Gómez', 'luis.gomez@example.com'),
 ('Marta Ruiz', 'marta.ruiz@example.com');
-MYSQL_SCRIPT && echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
+MYSQL_SCRIPT 
+echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
 
 sudo ip route del default
