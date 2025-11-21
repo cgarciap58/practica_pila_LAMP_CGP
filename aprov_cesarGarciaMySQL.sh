@@ -42,3 +42,5 @@ INSERT INTO users (nombre, email) VALUES
 MYSQL_SCRIPT
 
 echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
+
+sudo ip route del default
