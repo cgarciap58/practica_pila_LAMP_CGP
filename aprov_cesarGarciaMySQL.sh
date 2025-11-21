@@ -1,57 +1,44 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# En cualquier caso de error, para completamente
 set -e
+# Se configura el entorno para que no se pida confirmación
+export DEBIAN_FRONTEND=noninteractive
 
-echo "Comprobando conexión a internet"
-ping 8.8.8.8 -c 4
+echo "==> Provisionando el servidor de base de datos (MariaDB)"
 
-echo "Procediendo a actualizar repositorios"
-sudo apt update -y
+# Se actualizar e instalar MariaDB
+apt-get update -y
+apt-get install -y mariadb-server
 
-echo "Procediendo a instalar MySQL"
-sudo apt install -y mariadb-server
-systemctl enable mariadb
-systemctl start mariadb
+# Se configura MariaDB para escuchar en IP privada
+sed -i "s/^bind-address.*/bind-address = 192.168.10.6/" /etc/mysql/mariadb.conf.d/50-server.cnf
+systemctl restart mariadb
 
-DB_ROOT_PASS="toor"
-DB_NAME="lamp_db"
-DB_USER="uapp"
-DB_PASS="papp"
+# Se crea la base de datos, usuario y datos iniciales
+mysql -u root <<MYSQL_SCRIPT
+-- Crear base de datos
+CREATE DATABASE IF NOT EXISTS iawdb CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
-
-# Permitir conexiones remotas
-sudo sed -i "s/^bind-address.*/bind-address = 0.0.0.0/" /etc/mysql/mariadb.conf.d/50-server.cnf
-
-# Arrancar MySQL
-sudo systemctl enable mariadb
-sudo systemctl start mariadb
-
-# Configuramos la base de datos
-
-# Entramos a la base de datos y creamos la tabla
-mysql -u root <<EOF
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}';
-CREATE DATABASE IF NOT EXISTS ${DB_NAME};
-CREATE USER IF NOT EXISTS 'uapp'@'192.168.10.1' IDENTIFIED BY 'papp';
-GRANT ALL PRIVILEGES ON lamp_db.* TO 'uapp'@'192.168.10.1';
+-- Crear usuario y permisos
+CREATE USER IF NOT EXISTS 'iawuser'@'192.168.10.%' IDENTIFIED BY 'iawpass';
+GRANT ALL PRIVILEGES ON iawdb.* TO 'iawuser'@'192.168.10.%';
 FLUSH PRIVILEGES;
 
-USE ${DB_NAME};
-CREATE TABLE users (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  age INT UNSIGNED NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-EOF
+-- Crear tabla de usuarios
+USE iawdb;
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    fecha_registro DATE DEFAULT CURRENT_DATE
+);
 
-# Borramos el acceso al router porque ya está todo actualizado
-sudo ip route del default
+-- Insertar datos de ejemplo
+INSERT INTO users (nombre, email) VALUES
+('Ana Torres', 'ana.torres@example.com'),
+('Luis Gómez', 'luis.gomez@example.com'),
+('Marta Ruiz', 'marta.ruiz@example.com');
+MYSQL_SCRIPT
 
-# Reiniciamos SQL
-sudo systemctl restart mariadb
-
-echo "Servidor MySQL configurado correctamente"
-
-echo "Procediendo a iniciar MySQL"
-sudo systemctl start mariadb
-sudo systemctl status mariadb
+echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
