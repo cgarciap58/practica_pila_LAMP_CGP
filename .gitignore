@@ -1,5 +1,6 @@
 # Archivos de Vagrant
 /.vagrant/
+configGit.sh
 
 # Cache, temp and personal files
 
