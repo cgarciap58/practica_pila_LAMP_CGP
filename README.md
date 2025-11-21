@@ -334,3 +334,89 @@ systemctl restart apache2
 ```bash
 systemctl status apache2
 ```
+
+### Script aprovisionamiento de la máquina MariaDB
+
+1. Manejo de errores
+
+Utilizamos set -e para que el script se detenga en caso de error.
+El siguiente comando configura el entorno para que no se pida confirmación.
+
+```bash
+#!/usr/bin/env bash
+
+set -e
+# Se configura el entorno para que no se pida confirmación
+export DEBIAN_FRONTEND=noninteractive
+
+echo "==> Provisionando el servidor de base de datos (MariaDB)"
+```
+
+2. Actualización e instalación de MariaDB
+
+Se actualizan los repositorios y se instala MariaDB.
+
+```bash
+
+echo "==> Provisionando el servidor de base de datos (MariaDB)"
+
+# Se actualizar e instalar MariaDB
+apt-get update -y
+apt-get install -y mariadb-server && echo "MariaDB instalado correctamente"
+sleep 1
+```
+
+3. Se configura MariaDB para escuchar en IP privada, 
+En este caso la IP de la máquina MariaDB
+
+El comando 'sed' se encarga de reemplazar la línea que contiene 'bind-address' por 'bind-address = 192.168.10.6'
+
+Luego, se reinicia el servicio de MariaDB para que los cambios surtan efecto.
+
+```bash
+# Se configura MariaDB para escuchar en IP privada
+sed -i "s/^bind-address.*/bind-address = 192.168.10.6/" /etc/mysql/mariadb.conf.d/50-server.cnf
+systemctl restart mariadb
+```
+
+4. Se crea la base de datos, usuario y datos iniciales
+
+Aquí hemos creado una base de datos llamada 'iawdb', un usuario llamado 'iawuser' y una contraseña 'iawpass'. Hemos usado las mismas credenciales que configuramos anteriormente en el config.php.
+
+También hemos creado una tabla de usuarios y hemos insertado algunos datos de ejemplo. Esto lo hemos copiado del repositorio.
+
+Si todo es correcto, se muestra un mensaje de confirmación.
+
+```bash
+# Se crea la base de datos, usuario y datos iniciales
+mysql -u root <<MYSQL_SCRIPT
+-- Crear base de datos
+CREATE DATABASE IF NOT EXISTS iawdb CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+-- Crear usuario y permisos
+CREATE USER IF NOT EXISTS 'iawuser'@'192.168.10.%' IDENTIFIED BY 'iawpass';
+GRANT ALL PRIVILEGES ON iawdb.* TO 'iawuser'@'192.168.10.%';
+FLUSH PRIVILEGES;
+
+-- Crear tabla de usuarios
+USE iawdb;
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    fecha_registro DATE DEFAULT CURRENT_DATE
+);
+
+-- Insertar datos de ejemplo
+INSERT INTO users (nombre, email) VALUES
+('Ana Torres', 'ana.torres@example.com'),
+('Luis Gómez', 'luis.gomez@example.com'),
+('Marta Ruiz', 'marta.ruiz@example.com');
+MYSQL_SCRIPT && echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
+```
+
+5. Se borra la ruta por defecto para que la máquina no pueda acceder a Internet
+
+```bash
+sudo ip route del default
+```

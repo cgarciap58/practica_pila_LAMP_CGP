@@ -9,7 +9,8 @@ echo "==> Provisionando el servidor de base de datos (MariaDB)"
 
 # Se actualizar e instalar MariaDB
 apt-get update -y
-apt-get install -y mariadb-server
+apt-get install -y mariadb-server && echo "MariaDB instalado correctamente"
+sleep 1
 
 # Se configura MariaDB para escuchar en IP privada
 sed -i "s/^bind-address.*/bind-address = 192.168.10.6/" /etc/mysql/mariadb.conf.d/50-server.cnf
@@ -39,8 +40,6 @@ INSERT INTO users (nombre, email) VALUES
 ('Ana Torres', 'ana.torres@example.com'),
 ('Luis Gómez', 'luis.gomez@example.com'),
 ('Marta Ruiz', 'marta.ruiz@example.com');
-MYSQL_SCRIPT
-
-echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
+MYSQL_SCRIPT && echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
 
 sudo ip route del default
