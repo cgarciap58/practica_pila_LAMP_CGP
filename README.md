@@ -47,7 +47,6 @@ El objetivo de esta práctica es aprender a crear una infraestructura con stack 
 4. Añadimos el script de aprovisionamiento para la máquina Apache con todos los pasos necesarios
 
 ```bash
-
     #!/bin/bash
 
     echo "Comprobando conexión a internet"
@@ -140,7 +139,6 @@ El objetivo de esta práctica es aprender a crear una infraestructura con stack 
     sudo systemctl restart apache2
 
     sudo systemctl status apache2
-
 ```
 
 5. Añadimos el script de aprovisionamiento para la máquina MySQL con todos los pasos necesarios
@@ -158,7 +156,8 @@ El objetivo de esta práctica es aprender a crear una infraestructura con stack 
 
     # Se actualizar e instalar MariaDB
     apt-get update -y
-    apt-get install -y mariadb-server
+    apt-get install -y mariadb-server && echo "MariaDB instalado correctamente"
+    sleep 1
 
     # Se configura MariaDB para escuchar en IP privada
     sed -i "s/^bind-address.*/bind-address = 192.168.10.6/" /etc/mysql/mariadb.conf.d/50-server.cnf
@@ -188,10 +187,10 @@ El objetivo de esta práctica es aprender a crear una infraestructura con stack 
     ('Ana Torres', 'ana.torres@example.com'),
     ('Luis Gómez', 'luis.gomez@example.com'),
     ('Marta Ruiz', 'marta.ruiz@example.com');
-    MYSQL_SCRIPT
+    MYSQL_SCRIPT && echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
 
-    echo "==> ¡Provisionamiento de la base de datos completado con datos iniciales!"
-
+    sudo ip route del default
+    
 ```
 
 6. Levantamos las máquinas
